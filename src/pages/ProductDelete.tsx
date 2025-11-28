@@ -27,14 +27,19 @@ const ProductDelete: React.FC = () => {
     );
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     setLoading(true);
-    setTimeout(() => {
+    try {
       if (id) {
-        deleteProduct(parseInt(id));
+        await deleteProduct(parseInt(id));
         navigate('/productos');
       }
-    }, 500);
+    } catch (error) {
+      console.error('Error al eliminar producto:', error);
+      alert('Error al eliminar el producto. Verifica la conexión con el servidor.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = () => {

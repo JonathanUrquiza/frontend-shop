@@ -59,7 +59,7 @@ const ProductForm: React.FC = () => {
     return newErrors.length === 0;
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -77,15 +77,19 @@ const ProductForm: React.FC = () => {
       description: formData.description
     };
 
-    setTimeout(() => {
+    try {
       if (isEditMode && id) {
-        updateProduct(parseInt(id), productData);
+        await updateProduct(parseInt(id), productData);
       } else {
-        addProduct(productData);
+        await addProduct(productData);
       }
-      setLoading(false);
       navigate('/productos');
-    }, 500);
+    } catch (error) {
+      console.error('Error al guardar producto:', error);
+      setErrors(['Error al guardar el producto. Verifica la conexión con el servidor.']);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
