@@ -2,8 +2,43 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
-const getImageUrl = (imageFront?: string) => {
-    if (imageFront) return `/multimedia/${imageFront}`;
+const getImageUrl = (imageFront?: string, licence?: string, productName?: string) => {
+    // Si tiene image_front, normalizar la ruta
+    if (imageFront && imageFront.trim() !== '') {
+        let imagePath = imageFront.trim();
+        
+        // Si ya empieza con /multimedia/, usarla directamente
+        if (imagePath.startsWith('/multimedia/')) {
+            return imagePath;
+        }
+        // Si empieza con / pero no con /multimedia/, quitar el / inicial y agregar /multimedia/
+        else if (imagePath.startsWith('/')) {
+            return `/multimedia${imagePath}`;
+        }
+        // Si empieza con multimedia/, agregar solo el / inicial
+        else if (imagePath.startsWith('multimedia/')) {
+            return `/${imagePath}`;
+        }
+        // Si no tiene nada, agregar /multimedia/
+        else {
+            return `/multimedia/${imagePath}`;
+        }
+    }
+    
+    // Si no tiene image_front pero tiene licencia, intentar construir la ruta
+    if (licence && productName) {
+        // Normalizar el nombre de la licencia para que coincida con las carpetas
+        const licenceFolder = licence.toLowerCase().replace(/\s+/g, '-');
+        // Intentar construir una ruta basada en el nombre del producto y la licencia
+        const productSlug = productName.toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+        
+        // Retornar la ruta construida (el onError manejará si no existe)
+        return `/multimedia/${licenceFolder}/${productSlug}-1.webp`;
+    }
+    
+    // Último recurso: banner por defecto
     return '/multimedia/funkos-banner.webp';
 };
 
@@ -55,7 +90,7 @@ const Cart: React.FC = () => {
                                         {/* Imagen */}
                                         <div className="col-md-2 col-3 mb-3 mb-md-0">
                                             <img
-                                                src={getImageUrl(item.image_front)}
+                                                src={getImageUrl(item.image_front, item.licence, item.product_name)}
                                                 alt={item.product_name}
                                                 className="img-fluid rounded"
                                                 style={{ maxHeight: '100px', objectFit: 'cover' }}

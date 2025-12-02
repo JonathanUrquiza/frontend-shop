@@ -6,9 +6,9 @@ const Footer: React.FC = () => {
             <div className="container">
                 <p className="mb-0">&copy; {new Date().getFullYear()} Tienda Funkos. Todos los derechos reservados.</p>
                 <div className="mt-2">
-                    <a href="#" className="text-white-50 text-decoration-none mx-2">Términos</a>
-                    <a href="#" className="text-white-50 text-decoration-none mx-2">Privacidad</a>
-                    <a href="#" className="text-white-50 text-decoration-none mx-2">Contacto</a>
+                    <button className="btn btn-link text-white-50 text-decoration-none mx-2 p-0 border-0" style={{background: 'none'}}>Términos</button>
+                    <button className="btn btn-link text-white-50 text-decoration-none mx-2 p-0 border-0" style={{background: 'none'}}>Privacidad</button>
+                    <button className="btn btn-link text-white-50 text-decoration-none mx-2 p-0 border-0" style={{background: 'none'}}>Contacto</button>
                 </div>
             </div>
         </footer>

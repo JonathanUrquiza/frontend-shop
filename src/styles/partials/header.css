@@ -1,0 +1,104 @@
+/* HEADER */
+.page-header {
+    background-color: var(--dark-bg-solid);
+    padding: var(--spacing-36);
+    width: 100%;
+}    
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-20);
+}
+.navbar__logo {
+    max-width: 300px;
+}
+.navbar__logo img {
+    max-width: 100%;
+    height: auto;
+}
+.navbar__menu {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-20);
+    color: var(--font-light-solid);
+    font-family: var(--alternative-font);
+    font-size: var(--font-medium-20);
+    font-weight: 500;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.nav__item {
+    position: relative;
+}
+.navbar__link {
+    font-size: var(--font-medium);
+    padding: var(--spacing-8) var(--spacing-16);
+    display: inline-block;
+    transition: background .3s ease-in-out;
+    position: relative;
+    color: var(--font-light-solid);
+    text-decoration: none;
+    text-transform: uppercase;
+}
+.navbar__link:hover {
+    background-color: var(--primary-900);
+    color: var(--font-light-solid);
+}
+.with-icon {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-8);
+}
+.with-submenu {
+    position: relative;
+}
+.with-submenu:hover .submenu,
+.with-submenu .submenu.show {
+    display: block;
+    z-index: 1000;
+}
+.submenu {
+    display: none;
+    width: 300px;
+    position: absolute;
+    background-color: var(--dark-bg-solid);
+    top: 100%;
+    left: 0;
+    margin-top: 0;
+    padding: 0;
+    list-style: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+.submenu__item {
+    margin: 0;
+}
+.submenu__link {
+    display: block;
+    padding: var(--spacing-8) var(--spacing-16);
+    font-size: var(--font-medium);
+    transition: background .3s ease-in-out;
+    color: var(--font-light-solid);
+    text-decoration: none;
+    text-transform: none;
+}
+.submenu__link:hover {
+    background-color: var(--primary-900);
+    color: var(--font-light-solid);
+}
+
+/* Responsive */
+@media (max-width: 991.98px) {
+    .navbar__menu {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+    }
+    .submenu {
+        position: static;
+        width: 100%;
+        margin-left: var(--spacing-16);
+    }
+}
+

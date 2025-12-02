@@ -185,7 +185,7 @@ const ProductForm: React.FC = () => {
 
                 <div className="mb-3">
                   <label className="form-label" style={{ color: '#333', fontWeight: '600' }}>
-                    Imagen (nombre del archivo)
+                    Imagen (ruta relativa desde multimedia)
                   </label>
                   <input
                     type="text"
@@ -193,10 +193,12 @@ const ProductForm: React.FC = () => {
                     name="image_front"
                     value={formData.image_front}
                     onChange={handleChange}
-                    placeholder="funkos-banner.webp"
+                    placeholder="star-wars/baby-yoda-1.webp"
                     disabled={loading}
                   />
-                  <small className="text-muted">Dejar vacío para usar imagen por defecto</small>
+                  <small className="text-muted">
+                    Ruta relativa desde public/multimedia/ (ej: star-wars/baby-yoda-1.webp). Dejar vacío para usar imagen por defecto.
+                  </small>
                 </div>
 
                 <div className="mb-4">

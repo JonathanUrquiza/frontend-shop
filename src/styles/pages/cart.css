@@ -1,0 +1,122 @@
+/* Listado de items */
+.container--cartlist {
+    display: flex;
+    flex-direction: column;
+}
+.container__title {
+    width: fit-content;
+    border-bottom: 2px var(--primary-solid) solid;
+    font-family: var(--alternative-font);
+    font-weight: 400;
+    font-size: var(--font-xlarge);
+    color: var(--dark-solid);
+}
+
+/* Tabla listado de items */
+.table-cart {
+    border-collapse: separate;
+    border-spacing: 0 var(--spacing-36);
+}
+
+.table-cart__row {
+    border-radius: 10px;
+    background-color: var(--bg-light-solid);
+    box-shadow: 0px 0px 10px 0px rgb(0, 0, 0, 0.25);
+}
+
+.table-cart__data {
+    padding: 24px;
+    text-align: center;
+}
+
+/* FIX para redondear bordes de la tabla */
+.table-cart__data:first-child {
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.table-cart__data:last-child {
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.table-cart__data--head {
+    font-size: var(--font-medium);
+    font-weight: 700;
+}
+
+.table-cart__delet {
+    color: var(--dark-700);
+    transition: var(--transition--01);
+}
+
+.table-cart__delet:hover {
+    color: var(--primary-solid);
+}
+
+/* Modificadores */
+.card__picture--cart {
+    display: inline-block;
+    width: 150px;
+}
+
+.card__content--table {
+    text-align: start;
+}
+
+/* Fix center amount in table */
+.amount--table {
+    width: fit-content;
+    margin: 0 auto;
+}
+
+/* Resumen de compra */
+.container--resumen {
+    
+    max-width: 572px;
+    align-self: flex-end;
+    display: flex;
+    flex-direction: column;
+}
+
+.container--resumen>.container__title {
+    align-self: end;
+    font-family: var(--base-font);
+    font-weight: 700;
+    font-size: var( --font-large);
+}
+
+.resumen__content {
+    display: flex;
+    flex-direction: column;
+    margin-top: 34px;
+    margin-bottom: 44px;
+    min-width: 500px;
+    padding: var(--spacing-24);
+    gap: var(--spacing-20);
+}
+
+.resumen__div {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--font-medium);
+    font-weight: 600;
+}
+
+.resumen__div span:last-child {
+    font-weight: 700;
+    color: #747474;
+}
+
+.resumen__div:last-child {
+    padding-top: var(--spacing-8);
+    border-top: 2px solid #F33;
+    font-size: var(--font-medium-20);
+    font-weight: 700;
+}
+
+.btn-link--resumen {
+    font-size: var(--font-xlarge);
+    font-weight: 700;
+}
+

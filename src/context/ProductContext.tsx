@@ -58,13 +58,27 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
             
             const data: Product[] = await response.json();
             
+            // Debug: ver qué está recibiendo del backend
+            console.log('Productos recibidos del backend:', data);
+            if (data.length > 0) {
+                console.log('Primer producto ejemplo:', {
+                    product_name: data[0].product_name,
+                    image_front: data[0].image_front,
+                    licence: data[0].licence
+                });
+            }
+            
             // Normalizar el campo description (el backend usa product_description)
             const normalizedProducts = data.map(product => ({
                 ...product,
                 description: product.product_description || product.description || '',
-                // Si no hay imagen, usar imagen por defecto
-                image_front: product.image_front || 'funkos-banner.webp'
+                // Mantener image_front solo si tiene un valor válido (no vacío ni null)
+                image_front: product.image_front && product.image_front.trim() !== '' 
+                    ? product.image_front 
+                    : undefined
             }));
+            
+            console.log('Productos normalizados:', normalizedProducts.slice(0, 3));
             
             setProducts(normalizedProducts);
             setError(null);

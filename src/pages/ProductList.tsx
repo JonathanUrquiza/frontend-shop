@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useProducts, Product } from '../context/ProductContext';
 import { useAuth } from '../context/AuthContext';
+import Sidebar from '../components/Sidebar';
 
 // Interfaces para filtros
 interface LicenceInfo {
@@ -14,9 +15,102 @@ interface CategoryInfo {
   category_name: string;
 }
 
-// Función auxiliar para path de imagen
+// Función auxiliar para convertir imagen a -box (para mostrar en card)
+const getBoxImageUrl = (imagePath: string): string => {
+  if (!imagePath) return '/multimedia/funkos-banner.webp';
+  // Si termina en -1.webp, convertir a -box.webp
+  if (imagePath.endsWith('-1.webp')) {
+    return imagePath.replace(/-1\.webp$/, '-box.webp');
+  }
+  // Si ya termina en -box.webp, mantenerlo
+  if (imagePath.endsWith('-box.webp')) {
+    return imagePath;
+  }
+  // Si no tiene ni -1 ni -box, intentar agregar -box antes de .webp
+  return imagePath.replace(/\.webp$/, '-box.webp');
+};
+
+// Función auxiliar para convertir imagen a -1 (para hover)
+const getHoverImageUrl = (imagePath: string): string => {
+  if (!imagePath) return '/multimedia/funkos-banner.webp';
+  // Si termina en -box.webp, convertir a -1.webp
+  if (imagePath.endsWith('-box.webp')) {
+    return imagePath.replace(/-box\.webp$/, '-1.webp');
+  }
+  // Si ya termina en -1.webp, mantenerlo
+  if (imagePath.endsWith('-1.webp')) {
+    return imagePath;
+  }
+  // Si no tiene ni -1 ni -box, intentar agregar -1 antes de .webp
+  return imagePath.replace(/\.webp$/, '-1.webp');
+};
+
+// Función auxiliar para obtener la imagen box (por defecto en cards)
 const getImageUrl = (prod: Product) => {
-  if (prod.image_front) return `/multimedia/${prod.image_front}`;
+  // Si tiene image_front del backend, convertir a -box para mostrar en card
+  if (prod.image_front && prod.image_front.trim() !== '') {
+    // Normalizar la ruta del backend
+    let imagePath = prod.image_front.trim();
+    
+    // Si ya empieza con /multimedia/, usarla directamente
+    if (imagePath.startsWith('/multimedia/')) {
+      // Ya está completa
+    }
+    // Si empieza con / pero no con /multimedia/, quitar el / inicial y agregar /multimedia/
+    else if (imagePath.startsWith('/')) {
+      imagePath = `/multimedia${imagePath}`;
+    }
+    // Si empieza con multimedia/, agregar solo el / inicial
+    else if (imagePath.startsWith('multimedia/')) {
+      imagePath = `/${imagePath}`;
+    }
+    // Si no tiene nada, agregar /multimedia/
+    else {
+      imagePath = `/multimedia/${imagePath}`;
+    }
+    
+    const boxImage = getBoxImageUrl(imagePath);
+    console.log(`📦 CARD IMAGE - Producto: "${prod.product_name}"`);
+    console.log(`   Backend image_front: "${prod.image_front}"`);
+    console.log(`   Ruta normalizada: "${imagePath}"`);
+    console.log(`   Imagen box final: "${boxImage}"`);
+    console.log(`   ──────────────────────────────────────`);
+    return boxImage;
+  }
+  
+  // Último recurso: banner por defecto
+  console.warn(`⚠️ Sin imagen - Producto: "${prod.product_name}", usando banner por defecto`);
+  return '/multimedia/funkos-banner.webp';
+};
+
+// Función auxiliar para obtener la imagen hover (-1)
+const getHoverImage = (prod: Product) => {
+  if (prod.image_front && prod.image_front.trim() !== '') {
+    // Normalizar la ruta del backend
+    let imagePath = prod.image_front.trim();
+    
+    // Si ya empieza con /multimedia/, usarla directamente
+    if (imagePath.startsWith('/multimedia/')) {
+      // Ya está completa
+    }
+    // Si empieza con / pero no con /multimedia/, quitar el / inicial y agregar /multimedia/
+    else if (imagePath.startsWith('/')) {
+      imagePath = `/multimedia${imagePath}`;
+    }
+    // Si empieza con multimedia/, agregar solo el / inicial
+    else if (imagePath.startsWith('multimedia/')) {
+      imagePath = `/${imagePath}`;
+    }
+    // Si no tiene nada, agregar /multimedia/
+    else {
+      imagePath = `/multimedia/${imagePath}`;
+    }
+    
+    const hoverImage = getHoverImageUrl(imagePath);
+    console.log(`🖱️ HOVER IMAGE - Producto: "${prod.product_name}"`);
+    console.log(`   Imagen hover final: "${hoverImage}"`);
+    return hoverImage;
+  }
   return '/multimedia/funkos-banner.webp';
 };
 
@@ -29,6 +123,15 @@ const ProductList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedLicence, setSelectedLicence] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [sortBy, setSortBy] = useState<string>('mayor-precio');
+  const [minPrice, setMinPrice] = useState<number>(0);
+  const [maxPrice, setMaxPrice] = useState<number>(0);
+  const [filters, setFilters] = useState<{
+    nuevos?: boolean;
+    ofertas?: boolean;
+    edicionEspecial?: boolean;
+    favoritos?: boolean;
+  }>({});
 
   // Mock de licencias y categorías
   const licences: LicenceInfo[] = [
@@ -51,10 +154,11 @@ const ProductList: React.FC = () => {
     }
   }, [searchParams]);
 
-  // Filtrado instantáneo sin delay
+  // Filtrado y ordenamiento
   useEffect(() => {
     let result = [...allProducts];
 
+    // Filtro por licencia
     if (selectedLicence) {
       result = result.filter(p =>
         p.licence === selectedLicence ||
@@ -62,6 +166,7 @@ const ProductList: React.FC = () => {
       );
     }
 
+    // Filtro por búsqueda
     if (searchTerm) {
       result = result.filter(p =>
         p.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -69,11 +174,78 @@ const ProductList: React.FC = () => {
       );
     }
 
+    // Filtro por precio
+    if (minPrice > 0 || maxPrice > 0) {
+      result = result.filter(p => {
+        const price = p.price;
+        if (minPrice > 0 && maxPrice > 0) {
+          return price >= minPrice && price <= maxPrice;
+        } else if (minPrice > 0) {
+          return price >= minPrice;
+        } else if (maxPrice > 0) {
+          return price <= maxPrice;
+        }
+        return true;
+      });
+    }
+
+    // Filtro por ofertas
+    if (filters.ofertas) {
+      result = result.filter(p => p.discount && p.discount > 0);
+    }
+
+    // Ordenamiento
+    result.sort((a, b) => {
+      switch (sortBy) {
+        case 'mayor-precio':
+          return b.price - a.price;
+        case 'menor-precio':
+          return a.price - b.price;
+        case 'nombre-asc':
+          return a.product_name.localeCompare(b.product_name);
+        case 'nombre-desc':
+          return b.product_name.localeCompare(a.product_name);
+        case 'mas-nuevos':
+          return b.product_id - a.product_id;
+        default:
+          return 0;
+      }
+    });
+
     setFilteredProducts(result);
-  }, [allProducts, selectedLicence, selectedCategory, searchTerm]);
+  }, [allProducts, selectedLicence, selectedCategory, searchTerm, sortBy, minPrice, maxPrice, filters]);
+
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setSelectedLicence('');
+    setSelectedCategory('');
+    setSortBy('mayor-precio');
+    setMinPrice(0);
+    setMaxPrice(0);
+    setFilters({});
+  };
+
+  const handleSortChange = (value: string) => {
+    setSortBy(value);
+  };
+
+  const handlePriceChange = (min: number, max: number) => {
+    setMinPrice(min);
+    setMaxPrice(max);
+  };
+
+  const handleFiltersChange = (newFilters: {
+    nuevos?: boolean;
+    ofertas?: boolean;
+    edicionEspecial?: boolean;
+    favoritos?: boolean;
+  }) => {
+    setFilters(newFilters);
+  };
 
   return (
     <div className="container mt-4">
+      {/* Header */}
       <div className="row mb-4">
         <div className="col-12">
           <div className="d-flex justify-content-between align-items-center mb-3">
@@ -84,69 +256,47 @@ const ProductList: React.FC = () => {
               </Link>
             )}
           </div>
+        </div>
+      </div>
 
-          {/* Barra de búsqueda y filtros */}
-          <div className="card p-3 mb-4">
-            <div className="row g-3">
-              <div className="col-md-6">
-                <div className="input-group">
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Buscar productos..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                  <button className="btn btn-primary" type="button">
-                    <i className="bi bi-search"></i> Buscar
-                  </button>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <select
-                  className="form-select"
-                  value={selectedLicence}
-                  onChange={(e) => setSelectedLicence(e.target.value)}
-                >
-                  <option value="">Todas las licencias</option>
-                  {licences.map(lic => (
-                    <option key={lic.licence_id} value={lic.licence_name}>
-                      {lic.licence_name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="col-md-3">
-                <select
-                  className="form-select"
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                >
-                  <option value="">Todas las categorías</option>
-                  {categories.map(cat => (
-                    <option key={cat.category_id} value={cat.category_name}>
-                      {cat.category_name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
+      {/* Layout con Sidebar y Contenido */}
+      <div className="row">
+        {/* Sidebar */}
+        <div className="col-lg-3 mb-4 mb-lg-0">
+          <Sidebar
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            selectedLicence={selectedLicence}
+            setSelectedLicence={setSelectedLicence}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            licences={licences}
+            categories={categories}
+            onClearFilters={handleClearFilters}
+            sortBy={sortBy}
+            onSortChange={handleSortChange}
+            minPrice={minPrice}
+            maxPrice={maxPrice}
+            onPriceChange={handlePriceChange}
+            filters={filters}
+            onFiltersChange={handleFiltersChange}
+          />
+        </div>
 
+        {/* Contenido Principal */}
+        <div className="col-lg-9">
           {/* Resultados */}
           <div className="d-flex justify-content-between align-items-center mb-3">
             <p className="mb-0 text-white">
               {filteredProducts.length} producto{filteredProducts.length !== 1 ? 's' : ''} encontrado{filteredProducts.length !== 1 ? 's' : ''}
             </p>
           </div>
-        </div>
-      </div>
 
       {/* Grid de productos */}
       {filteredProducts.length === 0 ? (
         <div className="text-center py-5">
           <p className="text-white fs-5">No se encontraron productos</p>
-          <button onClick={() => { setSearchTerm(''); setSelectedLicence(''); }} className="btn btn-primary">
+          <button onClick={handleClearFilters} className="btn btn-primary">
             Ver todos los productos
           </button>
         </div>
@@ -155,13 +305,24 @@ const ProductList: React.FC = () => {
           {filteredProducts.map(prod => (
             <div key={prod.product_id} className="col-12 col-sm-6 col-md-4 col-lg-3">
               <div className="card h-100 shadow-sm border-0 product-card">
-                <div className="position-relative overflow-hidden" style={{ height: '250px' }}>
+                <div 
+                  className="position-relative overflow-hidden product-image-container" 
+                  style={{ height: '250px' }}
+                  onMouseEnter={(e) => {
+                    const img = e.currentTarget.querySelector('img') as HTMLImageElement;
+                    if (img) img.src = getHoverImage(prod);
+                  }}
+                  onMouseLeave={(e) => {
+                    const img = e.currentTarget.querySelector('img') as HTMLImageElement;
+                    if (img) img.src = getImageUrl(prod);
+                  }}
+                >
                   <Link to={`/productos/${prod.product_id}`}>
                     <img
                       src={getImageUrl(prod)}
                       className="card-img-top w-100 h-100"
                       alt={prod.product_name}
-                      style={{ objectFit: 'cover', transition: 'transform 0.3s' }}
+                      style={{ objectFit: 'cover', transition: 'opacity 0.3s ease-in-out' }}
                       onError={(e: any) => e.target.src = '/multimedia/funkos-banner.webp'}
                     />
                   </Link>
@@ -211,6 +372,8 @@ const ProductList: React.FC = () => {
           ))}
         </div>
       )}
+        </div>
+      </div>
     </div>
   );
 };

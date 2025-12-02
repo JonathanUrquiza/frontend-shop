@@ -1,0 +1,70 @@
+/* BUTTONS STYLES */
+.btn {
+    border: none;
+    cursor: pointer;
+}
+
+/* COLORS */
+
+.btn--primary {
+    background-color: var(--primary-solid);
+    color: var(--light-font-solid);
+    transition: bacground 0.2s ease-in-out;
+}
+
+.btn--primary:hover {
+    background-color: var(--secondary-solid);
+}
+
+/* SIZES */
+
+.btn--medium {
+    padding: var(--spacing-8) var(--spacing-16);
+}
+
+.btn--large {
+    padding: var(--spacing-12) var(--spacing-28);
+}
+
+.item__select {
+    display: flex;
+    flex-direction: column;
+}
+.item__quantity {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 18px;
+    height: 16px;
+    padding: 1px;
+    margin: 3px var(--spacing-16) 0 3px;
+    background-color: var(--dark-bg-solid);
+    color: var(--light-font-solid);
+
+}
+.item__submit {
+    width: 181px;
+    height: 37.9px;
+    border: 1px black solid;
+    background-color: var(--primary-solid);
+    color: var(--light-font-solid);
+    font-family: var(--base-font);
+    font-weight: 400;
+    font-size: 2rem;
+}
+
+.amount__btn {
+    width: 18px;
+    height: 16px;
+}
+.btn-link {
+    max-width: 572px;
+    text-align: center;
+    text-decoration: none;
+    color: var(--light-font-solid);
+    background-color: var(--primary-solid);
+    font-family: var(--base-font);
+    font-weight: 700;
+    padding: 5px var(--spacing-16) 5px var(--spacing-16);
+}
+

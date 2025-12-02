@@ -1,137 +1,256 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useProducts, Product } from '../context/ProductContext';
 
-// Función auxiliar para path de imagen
+// Función auxiliar para convertir imagen a -box (para mostrar en card)
+const getBoxImageUrl = (imagePath: string): string => {
+    if (!imagePath) return '/multimedia/funkos-banner.webp';
+    if (imagePath.endsWith('-1.webp')) {
+        return imagePath.replace(/-1\.webp$/, '-box.webp');
+    }
+    if (imagePath.endsWith('-box.webp')) {
+        return imagePath;
+    }
+    return imagePath.replace(/\.webp$/, '-box.webp');
+};
+
+// Función auxiliar para convertir imagen a -1 (para hover)
+const getHoverImageUrl = (imagePath: string): string => {
+    if (!imagePath) return '/multimedia/funkos-banner.webp';
+    if (imagePath.endsWith('-box.webp')) {
+        return imagePath.replace(/-box\.webp$/, '-1.webp');
+    }
+    if (imagePath.endsWith('-1.webp')) {
+        return imagePath;
+    }
+    return imagePath.replace(/\.webp$/, '-1.webp');
+};
+
+// Función auxiliar para obtener la imagen box (por defecto en cards)
 const getImageUrl = (prod: Product) => {
-    if (prod.image_front) return `/multimedia/${prod.image_front}`;
+    if (prod.image_front && prod.image_front.trim() !== '') {
+        let imagePath = prod.image_front.trim();
+        
+        if (imagePath.startsWith('/multimedia/')) {
+            // Ya está completa
+        }
+        else if (imagePath.startsWith('/')) {
+            imagePath = `/multimedia${imagePath}`;
+        }
+        else if (imagePath.startsWith('multimedia/')) {
+            imagePath = `/${imagePath}`;
+        }
+        else {
+            imagePath = `/multimedia/${imagePath}`;
+        }
+        
+        return getBoxImageUrl(imagePath);
+    }
     return '/multimedia/funkos-banner.webp';
 };
 
+// Función auxiliar para obtener la imagen hover (-1)
+const getHoverImage = (prod: Product) => {
+    if (prod.image_front && prod.image_front.trim() !== '') {
+        let imagePath = prod.image_front.trim();
+        
+        if (imagePath.startsWith('/multimedia/')) {
+            // Ya está completa
+        }
+        else if (imagePath.startsWith('/')) {
+            imagePath = `/multimedia${imagePath}`;
+        }
+        else if (imagePath.startsWith('multimedia/')) {
+            imagePath = `/${imagePath}`;
+        }
+        else {
+            imagePath = `/multimedia/${imagePath}`;
+        }
+        
+        return getHoverImageUrl(imagePath);
+    }
+    return '/multimedia/funkos-banner.webp';
+};
+
+// Datos de colecciones
+const collections = [
+    {
+        name: 'Pokemon',
+        description: 'Atrapa todos los que puedas y disfruta de una colección llena de amigos.',
+        image: '/multimedia/img/pokemon/pk-cover.webp',
+        link: '/productos?licencia=Pokemon'
+    },
+    {
+        name: 'Star Wars',
+        description: 'Disfruta de una saga que sigue agregando personajes a tu colección.',
+        image: '/multimedia/img/star-wars/st-cover.webp',
+        link: '/productos?licencia=Star Wars'
+    },
+    {
+        name: 'Harry Potter',
+        description: 'Revive los recuerdos de una saga llena de magia y encanto.',
+        image: '/multimedia/img/harry-potter/hp-cover.webp',
+        link: '/productos?licencia=Harry Potter'
+    },
+    {
+        name: 'Naruto',
+        description: 'Únete a la batalla contra Madara coleccionando los funko de Naruto Shippuden.',
+        image: '/multimedia/img/naruto/nt-cover.webp',
+        link: '/productos?licencia=Naruto'
+    }
+];
+
 const Home: React.FC = () => {
     const { products } = useProducts();
+    const [sliderIndex, setSliderIndex] = useState(0);
 
-    // Obtener los primeros 8 productos para la sección destacados
-    const featuredProducts = products.slice(0, 8);
+    // Obtener productos nuevos para el slider (últimos 9 productos, máximo 9)
+    const newProducts = products.length > 0 ? products.slice(-Math.min(9, products.length)) : [];
+    
+    // Calcular máximo de slides (mostramos 3 a la vez)
+    const maxSlides = Math.max(0, newProducts.length - 3);
+
+    const nextSlide = () => {
+        if (maxSlides > 0) {
+            setSliderIndex((prev) => (prev + 1) % (maxSlides + 1));
+        }
+    };
+
+    const prevSlide = () => {
+        if (maxSlides > 0) {
+            setSliderIndex((prev) => (prev - 1 + maxSlides + 1) % (maxSlides + 1));
+        }
+    };
 
     return (
         <div className="home-page">
-            {/* Hero Section */}
-            <section
-                className="hero-section"
+            {/* Hero Section - Nuevos Ingresos */}
+            <section 
+                className="hero text-center px-4 py-5"
                 style={{
-                    backgroundImage: `url(${process.env.PUBLIC_URL}/multimedia/funkos-hero-banner.webp)`
+                    backgroundImage: `url(${process.env.PUBLIC_URL}/multimedia/funkos-banner.webp)`,
+                    backgroundPosition: 'center top',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundAttachment: 'fixed',
+                    backgroundSize: 'cover'
                 }}
             >
-                <div className="hero-overlay"></div>
-                <div className="hero-content container">
-                    <h1 className="hero-title">Tienda de Funkos</h1>
-                    <p className="hero-subtitle">Encontrá tus figuras favoritas</p>
-                    <Link to="/productos" className="btn btn-primary btn-lg">
-                        Ver Productos
-                    </Link>
-                </div>
-            </section>
-
-            {/* Features Section */}
-            <section className="features-section py-5">
-                <div className="container">
-                    <div className="row g-4">
-                        <div className="col-md-4">
-                            <div className="feature-card text-center p-4">
-                                <div className="feature-icon mb-3">
-                                    <i className="bi bi-truck fs-1 text-primary"></i>
-                                </div>
-                                <h3 className="h5 fw-bold mb-2">Envío Gratis</h3>
-                                <p className="text-muted mb-0">En compras mayores a $50,000</p>
-                            </div>
-                        </div>
-                        <div className="col-md-4">
-                            <div className="feature-card text-center p-4">
-                                <div className="feature-icon mb-3">
-                                    <i className="bi bi-credit-card fs-1 text-primary"></i>
-                                </div>
-                                <h3 className="h5 fw-bold mb-2">Paga como quieras</h3>
-                                <p className="text-muted mb-0">Tarjeta, crédito, débito o efectivo</p>
-                            </div>
-                        </div>
-                        <div className="col-md-4">
-                            <div className="feature-card text-center p-4">
-                                <div className="feature-icon mb-3">
-                                    <i className="bi bi-shield-check fs-1 text-primary"></i>
-                                </div>
-                                <h3 className="h5 fw-bold mb-2">Comprá con seguridad</h3>
-                                <p className="text-muted mb-0">Tus productos protegidos</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Featured Products Section */}
-            <section className="featured-products-section py-5">
-                <div className="container">
-                    <div className="d-flex justify-content-between align-items-center mb-4">
-                        <h2 className="fw-bold text-white mb-0">Productos Destacados</h2>
-                        <Link to="/productos" className="btn btn-outline-light">
-                            Ver todos
+                <article className="container hero__content">
+                    <h3 className="hero__title">Nuevos Ingresos</h3>
+                    <div className="hero__info">
+                        <p className="hero__text lead">Descubrí el próximo Funko Pop de tu colección</p>
+                        <Link to="/productos" className="hero__link btn">
+                            SHOP
                         </Link>
                     </div>
-
-                    {featuredProducts.length === 0 ? (
-                        <div className="text-center py-5">
-                            <p className="text-white fs-5">No hay productos disponibles</p>
-                        </div>
-                    ) : (
-                        <div className="row g-4">
-                            {featuredProducts.map(prod => (
-                                <div key={prod.product_id} className="col-12 col-sm-6 col-md-4 col-lg-3">
-                                    <div className="card h-100 shadow-sm border-0 product-card">
-                                        <div className="position-relative overflow-hidden" style={{ height: '250px' }}>
-                                            <Link to={`/productos/${prod.product_id}`}>
-                                                <img
-                                                    src={getImageUrl(prod)}
-                                                    className="card-img-top w-100 h-100"
-                                                    alt={prod.product_name}
-                                                    style={{ objectFit: 'cover', transition: 'transform 0.3s' }}
-                                                    onError={(e: any) => e.target.src = '/multimedia/funkos-banner.webp'}
-                                                />
-                                            </Link>
-                                            {prod.stock === 0 && (
-                                                <div className="position-absolute top-0 end-0 m-2">
-                                                    <span className="badge bg-danger">Sin stock</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="card-body d-flex flex-column">
-                                            <Link to={`/productos/${prod.product_id}`} className="text-decoration-none text-dark">
-                                                <h6 className="card-title mb-2" style={{ minHeight: '40px', fontWeight: '700' }}>
-                                                    {prod.product_name}
-                                                </h6>
-                                            </Link>
-                                            <span className="badge bg-secondary mb-2 align-self-start">
-                                                {prod.sku.split('-')[1] || 'FUNKO'}
-                                            </span>
-                                            <div className="mt-auto">
-                                                <p className="card-text mb-1">
-                                                    <strong className="text-primary fs-5">${prod.price}</strong>
-                                                </p>
-                                                <Link
-                                                    to={`/productos/${prod.product_id}`}
-                                                    className="btn btn-primary w-100 mt-2"
-                                                >
-                                                    <i className="bi bi-eye me-2"></i>
-                                                    Ver Detalle
-                                                </Link>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
+                </article>
             </section>
+
+            {/* Collections Section */}
+            <main className="main-container">
+                {collections.map((collection, index) => (
+                    <section key={collection.name} className="collection container">
+                        <article className="collection__content">
+                            <h3 className="collection__title">{collection.name}</h3>
+                            <p className="collection__text">{collection.description}</p>
+                            <Link to={collection.link} className="collection__link">
+                                VER COLECCIÓN
+                            </Link>
+                        </article>
+                        <picture className="collection__cover">
+                            <img src={collection.image} alt={`Colección ${collection.name}`} />
+                        </picture>
+                    </section>
+                ))}
+
+                {/* Slider Section */}
+                {newProducts.length > 0 && (
+                    <section className="slider container">
+                        <div className="slider__track" style={{ position: 'relative', overflow: 'hidden' }}>
+                            <ul className="slider__items" style={{ 
+                                display: 'flex', 
+                                gap: 'var(--spacing-20)',
+                                transform: `translateX(-${sliderIndex * 33.333}%)`,
+                                transition: 'transform 0.5s ease-in-out',
+                                listStyle: 'none',
+                                padding: 0,
+                                margin: 0
+                            }}>
+                                {newProducts.map((prod) => {
+                                    const boxImage = getImageUrl(prod);
+                                    const hoverImage = getHoverImage(prod);
+                                    
+                                    return (
+                                        <li key={prod.product_id} className="slider__item" style={{ minWidth: '33.333%', flexShrink: 0 }}>
+                                            <article className="card-item">
+                                                <Link to={`/productos/${prod.product_id}`} className="card-item__link"></Link>
+                                                <picture className="card-item__cover">
+                                                    <span className="card-item__tag">NUEVO</span>
+                                                    <img 
+                                                        className="card-item__img--front" 
+                                                        src={boxImage}
+                                                        alt={prod.product_name}
+                                                        onError={(e: any) => e.target.src = '/multimedia/funkos-banner.webp'}
+                                                    />
+                                                    <img 
+                                                        className="card-item__img--back" 
+                                                        src={hoverImage}
+                                                        alt={`${prod.product_name} en caja`}
+                                                        onError={(e: any) => e.target.src = '/multimedia/funkos-banner.webp'}
+                                                    />
+                                                </picture>
+                                                <div className="card-item__content">
+                                                    <p className="card-item__licence">{prod.licence || 'FUNKO'}</p>
+                                                    <h4 className="card-item__name">{prod.product_name}</h4>
+                                                    <p className="card-item__price">${prod.price.toFixed(2).replace('.', ',')}</p>
+                                                    <p className="card-item__promo">3 CUOTAS SIN INTERÉS</p>
+                                                </div>
+                                            </article>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        </div>
+                        {newProducts.length > 3 && (
+                            <div className="slider__arrows" style={{ 
+                                display: 'flex', 
+                                justifyContent: 'center', 
+                                gap: 'var(--spacing-20)',
+                                marginTop: 'var(--spacing-36)'
+                            }}>
+                                <button 
+                                    className="slider__arrow slider__arrow--left" 
+                                    onClick={prevSlide}
+                                    style={{
+                                        background: 'none',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        fontSize: 'var(--font-large)',
+                                        color: 'var(--dark-bg-solid)',
+                                        fontWeight: '700'
+                                    }}
+                                >
+                                    ←
+                                </button>
+                                <button 
+                                    className="slider__arrow slider__arrow--right" 
+                                    onClick={nextSlide}
+                                    style={{
+                                        background: 'none',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        fontSize: 'var(--font-large)',
+                                        color: 'var(--dark-bg-solid)',
+                                        fontWeight: '700'
+                                    }}
+                                >
+                                    →
+                                </button>
+                            </div>
+                        )}
+                    </section>
+                )}
+            </main>
         </div>
     );
 };

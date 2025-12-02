@@ -8,9 +8,43 @@ const getImageUrl = (prod: Product, isBack = false) => {
   if (isBack) {
     return '/multimedia/funkos-banner.webp';
   }
-  if (prod.image_front) {
-    return `/multimedia/${prod.image_front}`;
+  
+  // Si tiene image_front, normalizar la ruta
+  if (prod.image_front && prod.image_front.trim() !== '') {
+    let imagePath = prod.image_front.trim();
+    
+    // Si ya empieza con /multimedia/, usarla directamente
+    if (imagePath.startsWith('/multimedia/')) {
+      return imagePath;
+    }
+    // Si empieza con / pero no con /multimedia/, quitar el / inicial y agregar /multimedia/
+    else if (imagePath.startsWith('/')) {
+      return `/multimedia${imagePath}`;
+    }
+    // Si empieza con multimedia/, agregar solo el / inicial
+    else if (imagePath.startsWith('multimedia/')) {
+      return `/${imagePath}`;
+    }
+    // Si no tiene nada, agregar /multimedia/
+    else {
+      return `/multimedia/${imagePath}`;
+    }
   }
+  
+  // Si no tiene image_front pero tiene licencia, intentar construir la ruta
+  if (prod.licence) {
+    // Normalizar el nombre de la licencia para que coincida con las carpetas
+    const licenceFolder = prod.licence.toLowerCase().replace(/\s+/g, '-');
+    // Intentar construir una ruta basada en el nombre del producto y la licencia
+    const productSlug = prod.product_name.toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    
+    // Retornar la ruta construida (el onError manejará si no existe)
+    return `/multimedia/${licenceFolder}/${productSlug}-1.webp`;
+  }
+  
+  // Último recurso: banner por defecto
   return '/multimedia/funkos-banner.webp';
 };
 

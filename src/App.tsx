@@ -18,7 +18,6 @@ import ProductDetail from './pages/ProductDetail';
 import ProductForm from './pages/ProductForm';
 import ProductDelete from './pages/ProductDelete';
 import Cart from './pages/Cart';
-import './App.css';
 
 function App() {
   return (
@@ -28,7 +27,7 @@ function App() {
           <Router>
             <div className="d-flex flex-column min-vh-100">
               <Navbar />
-              <main className="flex-grow-1">
+              <main className="flex-grow-1" style={{ paddingTop: '110px' }}>
                 <Routes>
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
