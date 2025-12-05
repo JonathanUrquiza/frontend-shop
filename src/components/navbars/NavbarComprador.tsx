@@ -1,27 +1,85 @@
+/**
+ * Componente NavbarComprador - Barra de navegación para compradores.
+ * 
+ * Este componente renderiza la barra de navegación específica para usuarios
+ * con rol de comprador. Incluye acceso a ver productos y gestionar el carrito.
+ * 
+ * Características:
+ * - Menú SHOP con categorías de productos
+ * - Enlace a CONTACTO
+ * - Acceso al carrito de compras con contador
+ * - Botón de logout
+ * - Menú responsive con hamburguesa en móviles
+ */
+
+// Importar React y hooks necesarios
 import React, { useState } from 'react';
+// Importar componentes de react-router-dom para navegación
 import { Link, useNavigate } from 'react-router-dom';
+// Importar hook useAuth para acceder al estado de autenticación
 import { useAuth } from '../../context/AuthContext';
+// Importar hook useCart para acceder al carrito de compras
 import { useCart } from '../../context/CartContext';
 
+/**
+ * Componente funcional NavbarComprador.
+ * 
+ * Renderiza la barra de navegación para compradores con opciones de
+ * visualización de productos y gestión del carrito.
+ * 
+ * @returns {JSX.Element} Barra de navegación para compradores
+ */
 const NavbarComprador: React.FC = () => {
+  // Obtener usuario y función logout del contexto de autenticación
   const { user, logout } = useAuth();
+  
+  // Obtener función para contar items del carrito
   const { getCartCount } = useCart();
+  
+  // Hook para navegar programáticamente a otras rutas
   const navigate = useNavigate();
+  
+  // Estado para controlar si el menú móvil está abierto o cerrado
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
+  // Estado para controlar si el dropdown SHOP está abierto
   const [isShopDropdownOpen, setIsShopDropdownOpen] = useState(false);
 
+  // Obtener el número total de items en el carrito
+  // Se actualiza automáticamente cuando cambia el carrito
   const cartCount = getCartCount();
 
+  /**
+   * Maneja el cierre de sesión del usuario.
+   * 
+   * Esta función se ejecuta cuando el usuario hace clic en el botón de logout.
+   * Cierra la sesión, cierra el menú móvil y redirige a la página de login.
+   * 
+   * @param {React.MouseEvent} e - Evento del click (para prevenir comportamiento por defecto)
+   */
   const handleLogout = async (e: React.MouseEvent) => {
+    // Prevenir comportamiento por defecto del enlace
     e.preventDefault();
+    
+    // Cerrar sesión del usuario (limpia el estado y localStorage)
     logout();
+    
+    // Cerrar el menú móvil si está abierto
     setIsMenuOpen(false);
+    
+    // Redirigir a la página de login
     navigate('/login');
   };
 
+  /**
+   * Cierra todos los dropdowns abiertos.
+   * 
+   * Esta función se usa para cerrar todos los menús desplegables cuando
+   * el usuario hace clic en un enlace o navega a otra página.
+   */
   const closeAllDropdowns = () => {
-    setIsMenuOpen(false);
-    setIsShopDropdownOpen(false);
+    setIsMenuOpen(false);  // Cerrar menú móvil
+    setIsShopDropdownOpen(false);  // Cerrar dropdown SHOP
   };
 
   return (

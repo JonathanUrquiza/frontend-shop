@@ -1,31 +1,95 @@
+/**
+ * Componente NavbarAdmin - Barra de navegación para administradores.
+ * 
+ * Este componente renderiza la barra de navegación específica para usuarios
+ * con rol de administrador. Incluye acceso completo a todas las funcionalidades
+ * del sistema.
+ * 
+ * Características:
+ * - Menú SHOP con categorías de productos
+ * - Menú PRODUCTOS con opciones de gestión (ver, crear, editar, categorías, licencias)
+ * - Menú ADMIN con gestión de usuarios
+ * - Contador de carrito de compras
+ * - Botón de logout
+ * - Menú responsive con hamburguesa en móviles
+ */
+
+// Importar React y hooks necesarios
 import React, { useState } from 'react';
+// Importar componentes de react-router-dom para navegación
 import { Link, useNavigate } from 'react-router-dom';
+// Importar hook useAuth para acceder al estado de autenticación
 import { useAuth } from '../../context/AuthContext';
+// Importar hook useCart para acceder al carrito de compras
 import { useCart } from '../../context/CartContext';
 
+/**
+ * Componente funcional NavbarAdmin.
+ * 
+ * Renderiza la barra de navegación completa para administradores con
+ * todos los menús y opciones disponibles.
+ * 
+ * @returns {JSX.Element} Barra de navegación para administradores
+ */
 const NavbarAdmin: React.FC = () => {
+  // Obtener usuario y función logout del contexto de autenticación
   const { user, logout } = useAuth();
+  
+  // Obtener función para contar items del carrito
   const { getCartCount } = useCart();
+  
+  // Hook para navegar programáticamente a otras rutas
   const navigate = useNavigate();
+  
+  // Estado para controlar si el menú móvil está abierto o cerrado
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
+  // Estado para controlar si el dropdown SHOP está abierto
   const [isShopDropdownOpen, setIsShopDropdownOpen] = useState(false);
+  
+  // Estado para controlar si el dropdown PRODUCTOS está abierto
   const [isProductosDropdownOpen, setIsProductosDropdownOpen] = useState(false);
+  
+  // Estado para controlar si el dropdown ADMIN está abierto
   const [isAdminDropdownOpen, setIsAdminDropdownOpen] = useState(false);
 
+  // Obtener el número total de items en el carrito
+  // Se actualiza automáticamente cuando cambia el carrito
   const cartCount = getCartCount();
 
+  /**
+   * Maneja el cierre de sesión del usuario.
+   * 
+   * Esta función se ejecuta cuando el usuario hace clic en el botón de logout.
+   * Cierra la sesión, cierra el menú móvil y redirige a la página de login.
+   * 
+   * @param {React.MouseEvent} e - Evento del click (para prevenir comportamiento por defecto)
+   */
   const handleLogout = async (e: React.MouseEvent) => {
+    // Prevenir comportamiento por defecto del enlace
     e.preventDefault();
+    
+    // Cerrar sesión del usuario (limpia el estado y localStorage)
     logout();
+    
+    // Cerrar el menú móvil si está abierto
     setIsMenuOpen(false);
+    
+    // Redirigir a la página de login
     navigate('/login');
   };
 
+  /**
+   * Cierra todos los dropdowns abiertos.
+   * 
+   * Esta función se usa para cerrar todos los menús desplegables cuando
+   * el usuario hace clic en un enlace o navega a otra página.
+   */
   const closeAllDropdowns = () => {
-    setIsMenuOpen(false);
-    setIsShopDropdownOpen(false);
-    setIsProductosDropdownOpen(false);
-    setIsAdminDropdownOpen(false);
+    setIsMenuOpen(false);  // Cerrar menú móvil
+    setIsShopDropdownOpen(false);  // Cerrar dropdown SHOP
+    setIsProductosDropdownOpen(false);  // Cerrar dropdown PRODUCTOS
+    setIsAdminDropdownOpen(false);  // Cerrar dropdown ADMIN
   };
 
   return (

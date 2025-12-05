@@ -1,19 +1,60 @@
+/**
+ * Componente NavbarGuest - Barra de navegación para usuarios no autenticados.
+ * 
+ * Este componente renderiza la barra de navegación para usuarios que no han
+ * iniciado sesión. Solo muestra opciones públicas del sitio.
+ * 
+ * Características:
+ * - Menú SHOP con categorías de productos
+ * - Menú CONTACTOS con opciones de contacto, FAQs y About
+ * - Enlace a LOGIN para iniciar sesión
+ * - Acceso al carrito de compras con contador (permite ver productos sin login)
+ * - Menú responsive con hamburguesa en móviles
+ */
+
+// Importar React y hooks necesarios
 import React, { useState } from 'react';
+// Importar Link de react-router-dom para navegación
 import { Link } from 'react-router-dom';
+// Importar hook useCart para acceder al carrito de compras
 import { useCart } from '../../context/CartContext';
 
+/**
+ * Componente funcional NavbarGuest.
+ * 
+ * Renderiza la barra de navegación para usuarios no autenticados con
+ * solo opciones públicas del sitio.
+ * 
+ * @returns {JSX.Element} Barra de navegación para usuarios invitados
+ */
 const NavbarGuest: React.FC = () => {
+  // Obtener función para contar items del carrito
+  // Los usuarios invitados también pueden tener items en el carrito
   const { getCartCount } = useCart();
+  
+  // Estado para controlar si el menú móvil está abierto o cerrado
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
+  // Estado para controlar si el dropdown SHOP está abierto
   const [isShopDropdownOpen, setIsShopDropdownOpen] = useState(false);
+  
+  // Estado para controlar si el dropdown CONTACTOS está abierto
   const [isContactDropdownOpen, setIsContactDropdownOpen] = useState(false);
 
+  // Obtener el número total de items en el carrito
+  // Se actualiza automáticamente cuando cambia el carrito
   const cartCount = getCartCount();
 
+  /**
+   * Cierra todos los dropdowns abiertos.
+   * 
+   * Esta función se usa para cerrar todos los menús desplegables cuando
+   * el usuario hace clic en un enlace o navega a otra página.
+   */
   const closeAllDropdowns = () => {
-    setIsMenuOpen(false);
-    setIsShopDropdownOpen(false);
-    setIsContactDropdownOpen(false);
+    setIsMenuOpen(false);  // Cerrar menú móvil
+    setIsShopDropdownOpen(false);  // Cerrar dropdown SHOP
+    setIsContactDropdownOpen(false);  // Cerrar dropdown CONTACTOS
   };
 
   return (
