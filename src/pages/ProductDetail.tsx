@@ -4,6 +4,13 @@ import { useProducts, Product } from '../context/ProductContext';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 
+// Función auxiliar para obtener el nombre de la licencia como string
+const getLicenceName = (licence?: string | { licence_id: number; licence_name: string }): string | undefined => {
+    if (!licence) return undefined;
+    if (typeof licence === 'string') return licence;
+    return licence.licence_name;
+};
+
 const getImageUrl = (prod: Product, isBack = false) => {
   if (isBack) {
     return '/multimedia/funkos-banner.webp';
@@ -32,9 +39,10 @@ const getImageUrl = (prod: Product, isBack = false) => {
   }
   
   // Si no tiene image_front pero tiene licencia, intentar construir la ruta
-  if (prod.licence) {
+  const licenceName = getLicenceName(prod.licence);
+  if (licenceName) {
     // Normalizar el nombre de la licencia para que coincida con las carpetas
-    const licenceFolder = prod.licence.toLowerCase().replace(/\s+/g, '-');
+    const licenceFolder = licenceName.toLowerCase().replace(/\s+/g, '-');
     // Intentar construir una ruta basada en el nombre del producto y la licencia
     const productSlug = prod.product_name.toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')

@@ -2,6 +2,13 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useProducts, Product } from '../context/ProductContext';
 
+// Función auxiliar para obtener el nombre de la licencia como string
+const getLicenceName = (licence?: string | { licence_id: number; licence_name: string }): string => {
+    if (!licence) return 'FUNKO';
+    if (typeof licence === 'string') return licence;
+    return licence.licence_name;
+};
+
 // Función auxiliar para convertir imagen a -box (para mostrar en card)
 const getBoxImageUrl = (imagePath: string): string => {
     if (!imagePath) return '/multimedia/funkos-banner.webp';
@@ -200,7 +207,7 @@ const Home: React.FC = () => {
                                                     />
                                                 </picture>
                                                 <div className="card-item__content">
-                                                    <p className="card-item__licence">{prod.licence || 'FUNKO'}</p>
+                                                    <p className="card-item__licence">{getLicenceName(prod.licence)}</p>
                                                     <h4 className="card-item__name">{prod.product_name}</h4>
                                                     <p className="card-item__price">${prod.price.toFixed(2).replace('.', ',')}</p>
                                                     <p className="card-item__promo">3 CUOTAS SIN INTERÉS</p>

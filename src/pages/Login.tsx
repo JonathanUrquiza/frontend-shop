@@ -107,8 +107,10 @@ const Login: React.FC = () => {
 
               <div className="mt-4 p-3 bg-light rounded">
                 <p className="mb-2 text-dark fw-semibold small">Credenciales de prueba:</p>
-                <p className="mb-1 small text-muted">👤 Admin: <code>admin@funkopop.com</code> / <code>admin123</code></p>
-                <p className="mb-0 small text-muted">👤 Usuario: <code>user@funkopop.com</code> / <code>user123</code></p>
+                <p className="mb-1 small text-muted">👑 Admin: <code>admin@funkopop.com</code> / <code>admin123</code></p>
+                <p className="mb-1 small text-muted">🛍️ Vendedor: <code>vendedor@funkopop.com</code> / <code>vendedor123</code></p>
+                <p className="mb-1 small text-muted">🛒 Comprador: <code>comprador@funkopop.com</code> / <code>comprador123</code></p>
+                <p className="mb-0 small text-muted">🔀 Mixto: <code>mixto@funkopop.com</code> / <code>mixto123</code></p>
               </div>
             </div>
           </div>

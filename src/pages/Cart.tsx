@@ -2,7 +2,14 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
-const getImageUrl = (imageFront?: string, licence?: string, productName?: string) => {
+// Función auxiliar para obtener el nombre de la licencia como string
+const getLicenceName = (licence?: string | { licence_id: number; licence_name: string }): string | undefined => {
+    if (!licence) return undefined;
+    if (typeof licence === 'string') return licence;
+    return licence.licence_name;
+};
+
+const getImageUrl = (imageFront?: string, licence?: string | { licence_id: number; licence_name: string }, productName?: string) => {
     // Si tiene image_front, normalizar la ruta
     if (imageFront && imageFront.trim() !== '') {
         let imagePath = imageFront.trim();
@@ -26,9 +33,10 @@ const getImageUrl = (imageFront?: string, licence?: string, productName?: string
     }
     
     // Si no tiene image_front pero tiene licencia, intentar construir la ruta
-    if (licence && productName) {
+    const licenceName = getLicenceName(licence);
+    if (licenceName && productName) {
         // Normalizar el nombre de la licencia para que coincida con las carpetas
-        const licenceFolder = licence.toLowerCase().replace(/\s+/g, '-');
+        const licenceFolder = licenceName.toLowerCase().replace(/\s+/g, '-');
         // Intentar construir una ruta basada en el nombre del producto y la licencia
         const productSlug = productName.toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')

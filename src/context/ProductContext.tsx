@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 // URL del backend - usa variable de entorno o fallback
-const API_URL = process.env.REACT_APP_API_URL || 'https://backend-shop-3btv.onrender.com';
+const API_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
 
 export interface Product {
     product_id: number;
@@ -10,10 +10,14 @@ export interface Product {
     stock: number;
     sku: string;
     image_front?: string;
+    image_back?: string;
     description?: string;
     product_description?: string;
-    licence?: string;
+    licence?: string | { licence_id: number; licence_name: string };
+    category?: { category_id: number; category_name: string };
     discount?: number;
+    dues?: number;
+    [key: string]: any; // Permitir campos adicionales del backend
 }
 
 interface ProductContextType {
@@ -95,13 +99,27 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
         fetchProducts();
     }, []);
 
-    const addProduct = async (product: Omit<Product, 'product_id'>) => {
+    const addProduct = async (product: Omit<Product, 'product_id'> | any) => {
         try {
-            // Preparar datos para el backend (usar product_description en lugar de description)
-            const productData = {
+            // Preparar datos para el backend
+            // El backend espera category_name y licence_name como strings
+            const productData: any = {
                 ...product,
-                product_description: product.description || product.product_description
+                product_description: product.description || product.product_description || ''
             };
+
+            // Asegurar que category_name y licence_name estén presentes
+            if (product.category_name) {
+                productData.category_name = product.category_name;
+            }
+            if (product.licence_name) {
+                productData.licence_name = product.licence_name;
+            }
+
+            // Remover campos que no necesita el backend
+            delete productData.description;
+            delete productData.category;
+            delete productData.licence;
 
             const response = await fetch(`${API_URL}/product/create/`, {
                 method: 'POST',
@@ -112,7 +130,8 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
             });
 
             if (!response.ok) {
-                throw new Error(`Error HTTP: ${response.status}`);
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `Error HTTP: ${response.status}`);
             }
 
             // Refrescar la lista de productos después de crear
@@ -123,13 +142,26 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
         }
     };
 
-    const updateProduct = async (id: number, updatedProduct: Omit<Product, 'product_id'>) => {
+    const updateProduct = async (id: number, updatedProduct: Omit<Product, 'product_id'> | any) => {
         try {
             // Preparar datos para el backend
-            const productData = {
+            const productData: any = {
                 ...updatedProduct,
-                product_description: updatedProduct.description || updatedProduct.product_description
+                product_description: updatedProduct.description || updatedProduct.product_description || ''
             };
+
+            // Asegurar que category_name y licence_name estén presentes si se proporcionan
+            if (updatedProduct.category_name) {
+                productData.category_name = updatedProduct.category_name;
+            }
+            if (updatedProduct.licence_name) {
+                productData.licence_name = updatedProduct.licence_name;
+            }
+
+            // Remover campos que no necesita el backend
+            delete productData.description;
+            delete productData.category;
+            delete productData.licence;
 
             const response = await fetch(`${API_URL}/product/update/${id}/`, {
                 method: 'PUT',
@@ -140,7 +172,8 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
             });
 
             if (!response.ok) {
-                throw new Error(`Error HTTP: ${response.status}`);
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `Error HTTP: ${response.status}`);
             }
 
             // Refrescar la lista de productos después de actualizar
